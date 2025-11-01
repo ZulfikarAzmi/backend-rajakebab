@@ -89,3 +89,13 @@ func Login(c *gin.Context) {
 		"token":   tokenStr,
 	})
 }
+
+func Logout(c *gin.Context) {
+	c.SetSameSite(http.SameSiteLaxMode)
+	c.SetCookie("Authorization", "", -1, "/", "localhost", false, true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Logout berhasil",
+	})
+}
+

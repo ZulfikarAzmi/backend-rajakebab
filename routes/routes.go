@@ -13,6 +13,7 @@ func SetupRoutes(r *gin.Engine) {
 	//auth
 	api.POST("/register", controllers.Register)
 	api.POST("/login", controllers.Login)
+	api.POST("/logout", controllers.Logout)
 
 	api.GET("/products", controllers.GetProducts)
 	api.GET("/products/:id", controllers.GetProductByID)
