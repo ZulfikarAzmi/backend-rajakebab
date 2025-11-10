@@ -90,6 +90,42 @@ func Login(c *gin.Context) {
 	})
 }
 
+func Me(c *gin.Context) {
+    tokenStr, err := c.Cookie("Authorization")
+    if err != nil {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Tidak ada token"})
+        return
+    }
+
+    token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+        return []byte(os.Getenv("JWT_SECRET")), nil
+    })
+    if err != nil || !token.Valid {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token tidak valid"})
+        return
+    }
+
+    claims, ok := token.Claims.(jwt.MapClaims)
+    if !ok {
+        c.JSON(http.StatusUnauthorized, gin.H{"error": "Token rusak"})
+        return
+    }
+
+    var user models.User
+    if err := config.DB.First(&user, claims["user_id"]).Error; err != nil {
+        c.JSON(http.StatusNotFound, gin.H{"error": "User tidak ditemukan"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "id":    user.ID,
+        "name":  user.Name,
+        "email": user.Email,
+        "role":  user.Role,
+    })
+}
+
+
 func Logout(c *gin.Context) {
 	c.SetSameSite(http.SameSiteLaxMode)
 	c.SetCookie("Authorization", "", -1, "/", "localhost", false, true)
